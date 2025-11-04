@@ -1,6 +1,7 @@
 package com.example.istea_tpclima.Front.Ciudad
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,27 +18,34 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.istea_tpclima.Core.Modelos.CiudadModel
 import com.example.istea_tpclima.R
+
 
 data class Ciudad(
     val nombre: String,
     val temperatura: String,
     val clima: String,
-    val imagenRes: Int
+    val imagenRes: Int,
+    val pais: String = "AR",
+    val id: String = nombre.lowercase().replace(" ", "_") + "_${pais.lowercase()}"
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CiudadesPage() {
+fun CiudadesPage(
+
+    onCiudadSeleccionada: (CiudadModel) -> Unit = {}
+) {
     var query by remember { mutableStateOf("") }
 
     val listaCiudades = remember {
         listOf(
-            Ciudad("City of Buenos Aires", "20 ºC", "Despejado", R.drawable.day),
-            Ciudad("City of Buenos Aires", "20 ºC", "Despejado", R.drawable.day),
-            Ciudad("City of Buenos Aires", "20 ºC", "Despejado", R.drawable.day),
-            Ciudad("City of Buenos Aires", "20 ºC", "Despejado", R.drawable.day),
-            Ciudad("City of Buenos Aires", "20 ºC", "Despejado", R.drawable.day)
+            Ciudad("City of Buenos Aires", "20 ºC", "Despejado", R.drawable.day, pais = "AR"),
+            Ciudad("Córdoba", "19 ºC", "Parcial nublado", R.drawable.day, pais = "AR"),
+            Ciudad("Rosario", "18 ºC", "Despejado", R.drawable.day, pais = "AR"),
+            Ciudad("Mendoza", "16 ºC", "Soleado", R.drawable.day, pais = "AR"),
+            Ciudad("La Plata", "17 ºC", "Parcial nublado", R.drawable.day, pais = "AR")
         )
     }
 
@@ -62,31 +70,40 @@ fun CiudadesPage() {
                 .fillMaxSize()
         ) {
             Button(
-                onClick = {},
+                onClick = {
+
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Place,
-                    contentDescription = null,
-                    tint = Color.White
-                )
+                Icon(imageVector = Icons.Default.Place, contentDescription = null, tint = Color.White)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    "Buscar por geolocalización",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
+                Text("Buscar por geolocalización", color = Color.White, fontWeight = FontWeight.Bold)
             }
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(listaCiudades) { ciudad ->
-                    CiudadItem(ciudad)
+                val filtradas = listaCiudades.filter {
+                    query.isBlank() || it.nombre.contains(query, ignoreCase = true)
+                }
+                items(filtradas) { ciudad ->
+                    CiudadItem(
+                        ciudad = ciudad,
+                        onClick = {
+
+                            onCiudadSeleccionada(
+                                CiudadModel(
+                                    id = ciudad.id,
+                                    nombre = ciudad.nombre,
+                                    pais = ciudad.pais
+                                )
+                            )
+                        }
+                    )
                 }
             }
         }
@@ -94,11 +111,15 @@ fun CiudadesPage() {
 }
 
 @Composable
-fun CiudadItem(ciudad: Ciudad) {
+private fun CiudadItem(
+    ciudad: Ciudad,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = 8.dp)
+            .clickable { onClick() },
         elevation = CardDefaults.cardElevation(4.dp),
         shape = RoundedCornerShape(10.dp)
     ) {
