@@ -1,19 +1,19 @@
 package com.example.istea_tpclima.Core.Modelos
 
-data class ClimaActual(
-    val tempC: Int,
-    val humedad: Int,
-    val descripcion: String
-)
-
-data class ClimaDia(
-    val dia: String, // "Lun", "Mar" (o "03", "04")
-    val minC: Int,
-    val maxC: Int
-)
-
 data class ClimaModel(
     val ciudad: CiudadModel,
-    val actual: ClimaActual,
+    val actual: Actual,
     val proximos5Dias: List<ClimaDia>
+) {
+    data class Actual(
+        val tempC: Int,
+        val descripcion: String,
+        val humedad: Int
+    )
+}
+
+data class ClimaDia(
+    val dia: String,
+    val minC: Int,
+    val maxC: Int
 )

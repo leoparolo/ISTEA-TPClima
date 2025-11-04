@@ -21,18 +21,22 @@ class ClimaViewModel(
 
     fun procesar(i: ClimaIntencion) = when (i) {
         ClimaIntencion.CargarPorCiudadGuardada -> cargarGuardada()
-        is ClimaIntencion.CargarPorCiudad -> cargar(i.ciudad)
-        ClimaIntencion.Refrescar -> refrescar()
-        ClimaIntencion.CambiarCiudadClick -> _estado.value = ClimaEstado.SinCiudadGuardada
-        ClimaIntencion.CompartirClick -> Unit
-        ClimaIntencion.LimpiarError -> _estado.value = ClimaEstado.Cargando
+        is ClimaIntencion.CargarPorCiudad      -> cargar(i.ciudad)
+        ClimaIntencion.Refrescar               -> refrescar()
+        ClimaIntencion.CambiarCiudadClick      -> _estado.value = ClimaEstado.SinCiudadGuardada
+        ClimaIntencion.CompartirClick          -> Unit
+        ClimaIntencion.LimpiarError            -> _estado.value = ClimaEstado.Cargando
     }
 
     private fun cargarGuardada() {
         _estado.value = ClimaEstado.Cargando
         viewModelScope.launch {
-            val c = prefs.leer().firstOrNull()
-            if (c == null) _estado.value = ClimaEstado.SinCiudadGuardada else cargar(c)
+            val c: CiudadModel? = prefs.leer().firstOrNull()
+            if (c == null) {
+                _estado.value = ClimaEstado.SinCiudadGuardada
+            } else {
+                cargar(c)
+            }
         }
     }
 

@@ -18,9 +18,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import com.example.istea_tpclima.Core.Modelos.CiudadModel
+import com.example.istea_tpclima.Infrastructure.Storage.Prefs
 import com.example.istea_tpclima.R
-
 
 data class Ciudad(
     val nombre: String,
@@ -34,9 +35,11 @@ data class Ciudad(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CiudadesPage(
-
-    onCiudadSeleccionada: (CiudadModel) -> Unit = {}
+    onCiudadSeleccionada: () -> Unit = {}   // ← ahora solo navega
 ) {
+    val ctx = LocalContext.current
+    val prefs = remember { Prefs(ctx) }
+
     var query by remember { mutableStateOf("") }
 
     val listaCiudades = remember {
@@ -69,20 +72,6 @@ fun CiudadesPage(
                 .padding(horizontal = 8.dp)
                 .fillMaxSize()
         ) {
-            Button(
-                onClick = {
-
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Icon(imageVector = Icons.Default.Place, contentDescription = null, tint = Color.White)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Buscar por geolocalización", color = Color.White, fontWeight = FontWeight.Bold)
-            }
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -94,14 +83,15 @@ fun CiudadesPage(
                     CiudadItem(
                         ciudad = ciudad,
                         onClick = {
-
-                            onCiudadSeleccionada(
-                                CiudadModel(
-                                    id = ciudad.id,
-                                    nombre = ciudad.nombre,
-                                    pais = ciudad.pais
-                                )
+                            val model = CiudadModel(
+                                id = ciudad.id,
+                                nombre = ciudad.nombre,
+                                pais = ciudad.pais
                             )
+                            // guardar en prefs
+                            prefs.guardar(model)
+                            // volver a Clima
+                            onCiudadSeleccionada()
                         }
                     )
                 }

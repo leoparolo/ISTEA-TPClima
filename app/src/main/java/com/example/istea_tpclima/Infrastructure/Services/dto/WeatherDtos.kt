@@ -3,26 +3,41 @@ package com.example.istea_tpclima.Infrastructure.Services.dto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+
 @Serializable
-data class GeoCityDto(
-    val name: String? = null,
-    val country: String? = null,
-    val lat: Double? = null,
-    val lon: Double? = null
+data class OpenWeatherCurrent(
+    val weather: List<WeatherDesc> = emptyList(),
+    val main: MainBlock = MainBlock(),
 )
 
 @Serializable
-data class CurrentDto(
-    val main: MainDto,
-    val weather: List<WeatherDto> = emptyList()
+data class WeatherDesc(
+    val description: String? = null
 )
-@Serializable data class MainDto(val temp: Double, val humidity: Int)
-@Serializable data class WeatherDto(val description: String? = null)
 
 @Serializable
-data class ForecastDto(val list: List<StepDto> = emptyList())
+data class MainBlock(
+    val temp: Double = 0.0,
+    val humidity: Int = 0,
+    @SerialName("temp_min") val temp_min: Double = 0.0,
+    @SerialName("temp_max") val temp_max: Double = 0.0
+)
+
+
 @Serializable
-data class StepDto(@SerialName("dt_txt") val dtTxt: String, val main: StepMainDto)
+data class OpenWeatherForecast5d(
+    val city: ForecastCity = ForecastCity(),
+    val list: List<ForecastItem> = emptyList()
+)
+
 @Serializable
-data class StepMainDto(@SerialName("temp_min") val tempMin: Double,
-                       @SerialName("temp_max") val tempMax: Double)
+data class ForecastCity(
+
+    val timezone: Int = 0
+)
+
+@Serializable
+data class ForecastItem(
+    val dt: Int = 0,
+    val main: MainBlock = MainBlock()
+)

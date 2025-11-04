@@ -3,31 +3,34 @@ package com.example.istea_tpclima.Infrastructure.Storage
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
-import com.example.istea_tpclima.Core.Modelos.CiudadModel
+import androidx.datastore.preferences.preferencesDataStoreFile
+import androidx.datastore.preferences.core.emptyPreferences
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import com.example.istea_tpclima.Core.Modelos.CiudadModel
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import java.io.IOException
 
-private val Context.dataStore by preferencesDataStore("app_prefs")
+class Prefs(context: Context) {
 
-class Prefs(private val context: Context) {
-    private val KEY_ID = stringPreferencesKey("ciudad_id")
-    private val KEY_NOMBRE = stringPreferencesKey("ciudad_nombre")
-    private val KEY_PAIS = stringPreferencesKey("ciudad_pais")
+    private val dataStore = PreferenceDataStoreFactory.create(
+        produceFile = { context.preferencesDataStoreFile("clima_prefs") }
+    )
+
+    private val KEY_CITY = stringPreferencesKey("city_name")
+
+
+    fun leer(): Flow<CiudadModel?> =
+        dataStore.data
+            .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
+            .map { prefs ->
+                val nombre = prefs[KEY_CITY]
+                if (nombre.isNullOrBlank()) null else CiudadModel(nombre = nombre)
+            }
+
 
     suspend fun guardar(ciudad: CiudadModel) {
-        context.dataStore.edit {
-            it[KEY_ID] = ciudad.id
-            it[KEY_NOMBRE] = ciudad.nombre
-            it[KEY_PAIS] = ciudad.pais
-        }
+        dataStore.edit { it[KEY_CITY] = ciudad.nombre }
     }
-
-    fun leer() = context.dataStore.data.map { p ->
-        val id = p[KEY_ID]
-        val n = p[KEY_NOMBRE]
-        val pa = p[KEY_PAIS]
-        if (id != null && n != null && pa != null) CiudadModel(id, n, pa) else null
-    }
-
-    suspend fun limpiar() = context.dataStore.edit { it.clear() }
 }
