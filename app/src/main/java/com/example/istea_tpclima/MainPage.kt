@@ -6,32 +6,26 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import com.example.istea_tpclima.Front.Ciudad.CiudadPage
+import com.example.istea_tpclima.Front.Clima.ClimaPage
 import com.example.istea_tpclima.Front.Router.Ruta
 
+sealed class Screen(val route: String) {
+    data object Clima : Screen("clima")
+    data object Ciudades : Screen("ciudades")
+}
 @Composable
 fun MainPage() {
     val navHostController = rememberNavController()
-    NavHost(
-        navController = navHostController,
-        startDestination = Ruta.Ciudades.id
-    ) {
-        composable(
-            route = Ruta.Ciudades.id
-        ) {
-            CiudadPage(navHostController)
+    NavHost(navController = navHostController,
+        startDestination = Screen.Clima.route)
+    {
+        composable(Screen.Clima.route) {
+            ClimaPage(onCambiarCiudad = { navHostController.navigate(Screen.Ciudades.route) })
         }
-//        composable(
-//            route = "clima?lat={lat}&lon={lon}&nombre={nombre}",
-//            arguments =  listOf(
-//                navArgument("lat") { type= NavType.FloatType },
-//                navArgument("lon") { type= NavType.FloatType },
-//                navArgument("nombre") { type= NavType.StringType }
-//            )
-//        ) {
-//            val lat = it.arguments?.getFloat("lat") ?: 0.0f
-//            val lon = it.arguments?.getFloat("lon") ?: 0.0f
-//            val nombre = it.arguments?.getString("nombre") ?: ""
-//            ClimaPage(navHostController, lat = lat, lon = lon, nombre = nombre)
-//        }
+
+        composable(Screen.Ciudades.route) {
+            CiudadPage(onCiudadSeleccionada = { navHostController.popBackStack() },
+                navHostController = navHostController)
+        }
     }
 }
