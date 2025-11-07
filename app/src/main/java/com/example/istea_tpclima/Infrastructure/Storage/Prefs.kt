@@ -17,7 +17,6 @@ class Prefs(context: Context) {
     private val dataStore = PreferenceDataStoreFactory.create(
         produceFile = { context.preferencesDataStoreFile("clima_prefs") }
     )
-    private val KEY_ID = stringPreferencesKey("city_id")
     private val KEY_NAME = stringPreferencesKey("city_name")
     private val KEY_COUNTRY = stringPreferencesKey("city_country")
     private val KEY_STATE = stringPreferencesKey("city_state")
@@ -30,19 +29,17 @@ class Prefs(context: Context) {
                 if (e is IOException) emit(emptyPreferences()) else throw e
             }
             .map { prefs ->
-                val id = prefs[KEY_ID]?.toLongOrNull()
                 val name = prefs[KEY_NAME]
                 val lat = prefs[KEY_LAT]?.toFloatOrNull()
                 val lon = prefs[KEY_LON]?.toFloatOrNull()
                 val country = prefs[KEY_COUNTRY]
                 val state = prefs[KEY_STATE].toString()
                 if (name == null || lat == null || lon == null) null
-                else CiudadModel(id,name, lat, lon, country ?: "", state)
+                else CiudadModel(name, lat, lon, country ?: "", state)
             }
 
     suspend fun guardar(ciudad: CiudadModel) {
         dataStore.edit {
-            it[KEY_ID] = ciudad.id.toString()
             it[KEY_NAME] = ciudad.name
             it[KEY_COUNTRY] = ciudad.country
             it[KEY_STATE] = ciudad.state ?: ""

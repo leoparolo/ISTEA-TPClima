@@ -5,6 +5,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.istea_tpclima.Front.Router.enrutador
 import com.example.istea_tpclima.Infrastructure.Implementations.CiudadService
+import com.example.istea_tpclima.Infrastructure.Implementations.PaisService
 
 @Composable
 fun CiudadPage(
@@ -13,7 +14,7 @@ fun CiudadPage(
 ) {
     val viewModel : CiudadesViewModel = viewModel(
         factory = CiudadesViewModelFactory(
-            repositorio = CiudadService(),
+            repositorio = CiudadService(paisservice = PaisService()),
             router = enrutador(navHostController)
         )
     )

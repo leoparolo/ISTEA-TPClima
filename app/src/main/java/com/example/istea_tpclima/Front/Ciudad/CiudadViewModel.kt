@@ -37,7 +37,7 @@ class CiudadesViewModel(
         uiState = CiudadEstado.cargando
         viewModelScope.launch {
             try {
-                ciudades = repositorio.get(nombre)
+                ciudades = repositorio.getWFlag(nombre)
                 if (ciudades.isEmpty()) {
                     uiState = CiudadEstado.vacio
                 } else {

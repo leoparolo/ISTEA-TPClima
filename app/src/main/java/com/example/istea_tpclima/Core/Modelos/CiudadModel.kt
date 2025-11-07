@@ -4,10 +4,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CiudadModel(
-    val id: Long? = null,
     val name: String,
     val lat: Float,
     val lon: Float,
     val country: String,
-    val state: String = ""
+    val countryFullName: String? = "",
+    val state: String = "",
+    val flag: String? = ""
 )

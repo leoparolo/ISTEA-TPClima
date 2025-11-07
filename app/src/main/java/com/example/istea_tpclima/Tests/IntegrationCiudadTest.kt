@@ -5,8 +5,9 @@ import com.example.istea_tpclima.Infrastructure.Implementations.PaisService
 import kotlinx.coroutines.runBlocking
 
 fun main() = runBlocking {
-    val ciudadservice = CiudadService()
     val paisservice = PaisService()
+    val ciudadservice = CiudadService(paisservice)
+
 
     try {
         val ciudades = ciudadservice.get("buenos aires")
