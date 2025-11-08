@@ -4,10 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.compose.composable
-import com.example.istea_tpclima.Front.Ciudad.CiudadPage
-import com.example.istea_tpclima.Front.Clima.ClimaPage
-import com.example.istea_tpclima.Front.Router.Ruta
+import com.example.istea_tpclima.front.ciudad.CiudadPage
+import com.example.istea_tpclima.front.clima.ClimaPage
 
 sealed class Screen(val route: String) {
     data object Clima : Screen("clima")
