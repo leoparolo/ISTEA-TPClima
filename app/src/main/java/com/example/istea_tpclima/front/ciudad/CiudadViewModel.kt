@@ -9,17 +9,21 @@ import androidx.lifecycle.viewModelScope
 import com.example.istea_tpclima.core.features.ciudades.CiudadEstado
 import com.example.istea_tpclima.core.features.ciudades.CiudadIntencion
 import com.example.istea_tpclima.core.modelos.CiudadModel
-import com.example.istea_tpclima.core.services.ICiudadService
+import com.example.istea_tpclima.core.repositories.ICiudadRepository
 import com.example.istea_tpclima.front.router.Ruta
 import com.example.istea_tpclima.front.router.router
+import com.example.istea_tpclima.infrastructure.implementations.LocationRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class CiudadesViewModel(
-    val repositorio: ICiudadService,
-    val router: router
+    val repositorio: ICiudadRepository,
+    val router: router,
+    private val locationRepository : LocationRepository
 ) : ViewModel(){
     var uiState by mutableStateOf<CiudadEstado>(CiudadEstado.vacio)
     var ciudades : List<CiudadModel> = emptyList()
+    private var searchJob : Job? = null
     fun ejecutar(intencion: CiudadIntencion){
         when(intencion){
             is CiudadIntencion.buscar -> buscar(nombre = intencion.nombre)
@@ -29,24 +33,72 @@ class CiudadesViewModel(
     }
 
     private fun geolocalizar() {
-        TODO("Not yet implemented")
+        uiState = CiudadEstado.cargando
+
+        viewModelScope.launch {
+            try {
+                val ciudadNombre = locationRepository.getCurrentCityName()
+
+                if (ciudadNombre == null) {
+                    uiState = CiudadEstado.error("No se pudo obtener tu ubicación actual")
+                    return@launch
+                }
+
+                // Busco en el repositorio usando el nombre de la ciudad detectada
+                ciudades = repositorio.getWFlag(ciudadNombre)
+
+                if (ciudades.isEmpty()) {
+                    uiState = CiudadEstado.error("No encontramos resultados para $ciudadNombre")
+                } else {
+                    // Tomo la primera ciudad encontrada y navego directo al clima
+                    val ciudad = ciudades.first()
+                    seleccionar(ciudad)
+                }
+
+            } catch (e: SecurityException) {
+                uiState = CiudadEstado.error("La app no tiene permiso de ubicación")
+            } catch (e: Exception) {
+                uiState = CiudadEstado.error(
+                    e.message ?: "Error al buscar por geolocalización"
+                )
+            }
+        }
     }
 
     private fun buscar( nombre: String){
-
-        uiState = CiudadEstado.cargando
-        viewModelScope.launch {
+        searchJob?.cancel()
+        if (nombre.isBlank()) {
+            uiState = CiudadEstado.vacio
+            ciudades = emptyList()
+            return
+        }
+        searchJob = viewModelScope.launch {
+            uiState = CiudadEstado.cargando
             try {
-                ciudades = repositorio.getWFlag(nombre)
-                if (ciudades.isEmpty()) {
-                    uiState = CiudadEstado.vacio
+                val resultado = repositorio.getWFlag(nombre)
+                ciudades = resultado
+                uiState = if (resultado.isEmpty()) {
+                    CiudadEstado.vacio
                 } else {
-                    uiState = CiudadEstado.resultado(ciudades)
+                    CiudadEstado.resultado(resultado)
                 }
-            } catch (exeption: Exception){
-                uiState = CiudadEstado.error(exeption.message ?: "error desconocido")
+            } catch (e: Exception) {
+                uiState = CiudadEstado.error(e.message ?: "error desconocido")
             }
         }
+//        uiState = CiudadEstado.cargando
+//        viewModelScope.launch {
+//            try {
+//                ciudades = repositorio.getWFlag(nombre)
+//                if (ciudades.isEmpty()) {
+//                    uiState = CiudadEstado.vacio
+//                } else {
+//                    uiState = CiudadEstado.resultado(ciudades)
+//                }
+//            } catch (exeption: Exception){
+//                uiState = CiudadEstado.error(exeption.message ?: "error desconocido")
+//            }
+//        }
     }
 
     private fun seleccionar(ciudad: CiudadModel){
@@ -61,13 +113,14 @@ class CiudadesViewModel(
 
 
 class CiudadesViewModelFactory(
-    private val repositorio: ICiudadService,
-    private val router: router
+    private val repositorio: ICiudadRepository,
+    private val router: router,
+    private val locationRepository: LocationRepository
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CiudadesViewModel::class.java)) {
-            return CiudadesViewModel(repositorio,router) as T
+            return CiudadesViewModel(repositorio,router, locationRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

@@ -1,13 +1,13 @@
 package com.example.istea_tpclima.infrastructure.implementations
 
 import com.example.istea_tpclima.core.modelos.PaisModel
-import com.example.istea_tpclima.core.services.IPaisService
+import com.example.istea_tpclima.core.repositories.IPaisRepository
 import com.example.istea_tpclima.infrastructure.shared.ApiRouter
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 
-class PaisService : IPaisService
+class PaisRepository : IPaisRepository
 {
     private val client = HttpClientProvider.client
 
@@ -18,7 +18,7 @@ class PaisService : IPaisService
             val pais = respuesta.body<List<PaisModel>>()
             return pais
         }else{
-            throw Exception()
+            throw Exception("HTTP ${respuesta.status} al consultar países")
         }
     }
 }

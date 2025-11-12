@@ -6,45 +6,74 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import com.example.istea_tpclima.core.modelos.CiudadModel
 import java.io.IOException
 
-class Prefs(context: Context) {
+// ✅ DataStore SINGLETON asociado al Context
+private val Context.dataStore by preferencesDataStore(name = "clima_prefs")
 
-    private val dataStore = PreferenceDataStoreFactory.create(
-        produceFile = { context.preferencesDataStoreFile("clima_prefs") }
-    )
-    private val KEY_NAME = stringPreferencesKey("city_name")
-    private val KEY_COUNTRY = stringPreferencesKey("city_country")
-    private val KEY_STATE = stringPreferencesKey("city_state")
-    private val KEY_LAT = stringPreferencesKey("city_lat")
-    private val KEY_LON = stringPreferencesKey("city_lon")
+class Prefs(private val context: Context) {
 
+    companion object {
+        private val KEY_NOMBRE = stringPreferencesKey("nombre")
+        private val KEY_COUNTRY = stringPreferencesKey("country")
+        private val KEY_COUNTRY_FULL_NAME = stringPreferencesKey("countryFullName")
+        private val KEY_FLAG = stringPreferencesKey("flag")
+        private val KEY_STATE = stringPreferencesKey("state")
+        private val KEY_LAT = floatPreferencesKey("lat")
+        private val KEY_LON = floatPreferencesKey("lon")
+    }
+
+    // Lee la ciudad guardada como Flow<CiudadModel?>
     fun leer(): Flow<CiudadModel?> =
-        dataStore.data
+        context.dataStore.data
             .catch { e ->
                 if (e is IOException) emit(emptyPreferences()) else throw e
             }
             .map { prefs ->
-                val name = prefs[KEY_NAME]
-                val lat = prefs[KEY_LAT]?.toFloatOrNull()
-                val lon = prefs[KEY_LON]?.toFloatOrNull()
+                val nombre = prefs[KEY_NOMBRE]
                 val country = prefs[KEY_COUNTRY]
-                val state = prefs[KEY_STATE].toString()
-                if (name == null || lat == null || lon == null) null
-                else CiudadModel(name, lat, lon, country ?: "", state)
+                val countryFullName = prefs[KEY_COUNTRY_FULL_NAME]
+                val flag = prefs[KEY_FLAG]
+                val state = prefs[KEY_STATE]
+                val lat = prefs[KEY_LAT]
+                val lon = prefs[KEY_LON]
+
+                if (nombre == null || lat == null || lon == null) {
+                    null
+                } else {
+                    CiudadModel(
+                        name = nombre,
+                        country = country ?: "",
+                        countryFullName = countryFullName ?: "",
+                        flag = flag ?: "",
+                        state = state ?: "",
+                        lat = lat,
+                        lon = lon
+                    )
+                }
             }
 
+    // Guarda la ciudad elegida
     suspend fun guardar(ciudad: CiudadModel) {
-        dataStore.edit {
-            it[KEY_NAME] = ciudad.name
-            it[KEY_COUNTRY] = ciudad.country
-            it[KEY_STATE] = ciudad.state ?: ""
-            it[KEY_LAT] = ciudad.lat.toString()
-            it[KEY_LON] = ciudad.lon.toString()
+        context.dataStore.edit { prefs ->
+            prefs[KEY_NOMBRE] = ciudad.name
+            prefs[KEY_COUNTRY] = ciudad.country
+            prefs[KEY_COUNTRY_FULL_NAME] = ciudad.countryFullName ?: ""
+            prefs[KEY_FLAG] = ciudad.flag ?: ""
+            prefs[KEY_STATE] = ciudad.state ?: ""
+            prefs[KEY_LAT] = ciudad.lat
+            prefs[KEY_LON] = ciudad.lon
         }
+    }
+
+    // (Opcional) limpiar prefs
+    suspend fun limpiar() {
+        context.dataStore.edit { it.clear() }
     }
 }

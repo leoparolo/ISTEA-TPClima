@@ -1,7 +1,7 @@
-package com.example.istea_tpclima.core.services
+package com.example.istea_tpclima.core.repositories
 
 import com.example.istea_tpclima.core.modelos.PaisModel
 
-interface IPaisService {
+interface IPaisRepository {
     suspend fun get(pais: String): List<PaisModel>
 }
