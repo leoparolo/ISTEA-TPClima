@@ -1,8 +1,8 @@
-package com.example.istea_tpclima.core.services
+package com.example.istea_tpclima.core.repositories
 
 import com.example.istea_tpclima.core.modelos.CiudadModel
 
-interface ICiudadService{
+interface ICiudadRepository{
     suspend fun get(ciudad: String): List<CiudadModel>
     suspend fun getWFlag(ciudad: String): List<CiudadModel>
 }

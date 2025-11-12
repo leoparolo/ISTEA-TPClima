@@ -1,5 +1,10 @@
 package com.example.istea_tpclima.front.ciudad
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +54,7 @@ import com.example.istea_tpclima.infrastructure.storage.Prefs
 import com.example.istea_tpclima.R
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.clip
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
@@ -63,7 +69,6 @@ fun CiudadesView (
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        backgroundImage(modifier)
         Scaffold(
             modifier = modifier,
             topBar = {topBarBuscador(modifier,onAction)},
@@ -75,7 +80,9 @@ fun CiudadesView (
                     .padding(horizontal = 8.dp)
                     .fillMaxSize()
             ) {
-                buttonGeolocalizar(modifier)
+                buttonGeolocalizar(modifier) {
+                    onAction(CiudadIntencion.geolocalizar)
+                }
                 when (state) {
                     CiudadEstado.cargando -> { CiudadCargandoView(modifier) }
                     is CiudadEstado.error -> { CiudadErrorView(modifier,state.mensaje) }
@@ -86,21 +93,7 @@ fun CiudadesView (
         }
     }
 }
-@Composable
-fun backgroundImage(modifier: Modifier)
-{
-    Image(
-        painter = painterResource(id = R.drawable.modern_city),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = modifier.fillMaxSize()
-    )
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.2f))
-    )
-}
+
 @Composable
 fun topBarBuscador(
     modifier: Modifier = Modifier,
@@ -123,11 +116,37 @@ fun topBarBuscador(
     )
 }
 @Composable
-fun buttonGeolocalizar(modifier: Modifier)
+fun buttonGeolocalizar(modifier: Modifier,
+                       onGeolocalizar: () -> Unit)
 {
+    val context = LocalContext.current
+
+    // Lanzador del diálogo del sistema para pedir el permiso
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            onGeolocalizar()
+        } else {
+            Toast.makeText(context, "Permiso de ubicación denegado", Toast.LENGTH_LONG).show()
+        }
+    }
     Button(
-        onClick = {},
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+        onClick = {
+            val permiso = Manifest.permission.ACCESS_FINE_LOCATION
+            val tienePermiso = ContextCompat.checkSelfPermission(
+                context,
+                permiso
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (tienePermiso) {
+                // Ya tiene el permiso, ejecuta la geolocalización directamente
+                onGeolocalizar()
+            } else {
+                // Lanza el diálogo del sistema para pedir permiso
+                launcher.launch(permiso)
+            }},
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD48C84)),
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),

@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.istea_tpclima.core.features.clima.ClimaEstado
 import com.example.istea_tpclima.core.features.clima.ClimaIntencion
 import com.example.istea_tpclima.core.modelos.CiudadModel
-import com.example.istea_tpclima.infrastructure.implementations.ClimaService
+import com.example.istea_tpclima.infrastructure.implementations.ClimaRepository
 import com.example.istea_tpclima.infrastructure.storage.Prefs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 class ClimaViewModel(
-    private val repo: ClimaService,
+    private val repo: ClimaRepository,
     private val prefs: Prefs
 ) : ViewModel() {
 

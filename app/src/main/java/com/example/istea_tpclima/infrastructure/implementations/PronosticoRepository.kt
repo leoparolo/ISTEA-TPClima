@@ -1,13 +1,13 @@
 package com.example.istea_tpclima.infrastructure.implementations
 
-import com.example.istea_tpclima.core.services.IPronosticoService
+import com.example.istea_tpclima.core.repositories.IPronosticoRepository
 import com.example.istea_tpclima.infrastructure.shared.ApiRouter
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.HttpStatusCode
 
-class PronosticoService : IPronosticoService
+class PronosticoRepository : IPronosticoRepository
 {
     private val client = HttpClientProvider.client
     private val APIKey = "d867b80e9ff8e2822fde457ee118deba"
@@ -21,7 +21,7 @@ class PronosticoService : IPronosticoService
             val forecast = respuesta.body<List<String>>()
             return forecast
         }else{
-            throw Exception()
+            throw Exception("HTTP ${respuesta.status} en forecast()")
         }
     }
 }

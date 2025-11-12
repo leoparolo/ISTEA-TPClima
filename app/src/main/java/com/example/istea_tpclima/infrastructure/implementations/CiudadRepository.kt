@@ -1,17 +1,17 @@
 package com.example.istea_tpclima.infrastructure.implementations
 
 import com.example.istea_tpclima.core.modelos.CiudadModel
-import com.example.istea_tpclima.core.services.ICiudadService
-import com.example.istea_tpclima.core.services.IPaisService
+import com.example.istea_tpclima.core.repositories.ICiudadRepository
+import com.example.istea_tpclima.core.repositories.IPaisRepository
 import com.example.istea_tpclima.infrastructure.shared.ApiRouter
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.HttpStatusCode
 
-class CiudadService(
-    private val paisservice: IPaisService
-) : ICiudadService
+class CiudadRepository(
+    private val paisservice: IPaisRepository
+) : ICiudadRepository
 {
     private val client = HttpClientProvider.client
     private val APIKey = "d867b80e9ff8e2822fde457ee118deba"

@@ -9,13 +9,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.istea_tpclima.core.features.clima.ClimaEstado
 import com.example.istea_tpclima.core.features.clima.ClimaIntencion
-import com.example.istea_tpclima.infrastructure.implementations.ClimaService
+import com.example.istea_tpclima.infrastructure.implementations.ClimaRepository
 import com.example.istea_tpclima.infrastructure.storage.Prefs
 
 @Composable
 fun ClimaPage(onCambiarCiudad: () -> Unit) {
     val ctx = LocalContext.current
-    val vm = remember { ClimaViewModel(repo = ClimaService(), prefs = Prefs(ctx)) }
+    val vm = remember { ClimaViewModel(repo = ClimaRepository(), prefs = Prefs(ctx)) }
     val estado by vm.estado.collectAsState()
 
     LaunchedEffect(Unit) { vm.procesar(ClimaIntencion.CargarPorCiudadGuardada) }

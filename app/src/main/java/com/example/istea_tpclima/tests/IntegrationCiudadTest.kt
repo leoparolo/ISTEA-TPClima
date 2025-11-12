@@ -1,12 +1,12 @@
 package com.example.istea_tpclima.tests
 
-import com.example.istea_tpclima.infrastructure.implementations.CiudadService
-import com.example.istea_tpclima.infrastructure.implementations.PaisService
+import com.example.istea_tpclima.infrastructure.implementations.CiudadRepository
+import com.example.istea_tpclima.infrastructure.implementations.PaisRepository
 import kotlinx.coroutines.runBlocking
 
 fun main() = runBlocking {
-    val paisservice = PaisService()
-    val ciudadservice = CiudadService(paisservice)
+    val paisservice = PaisRepository()
+    val ciudadservice = CiudadRepository(paisservice)
 
 
     try {

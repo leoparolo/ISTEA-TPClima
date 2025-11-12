@@ -1,10 +1,10 @@
 package com.example.istea_tpclima.tests
 
-import com.example.istea_tpclima.infrastructure.implementations.PaisService
+import com.example.istea_tpclima.infrastructure.implementations.PaisRepository
 import kotlinx.coroutines.runBlocking
 
 fun main() = runBlocking {
-    val service = PaisService()
+    val service = PaisRepository()
 
     try {
         val paises = service.get("ar")

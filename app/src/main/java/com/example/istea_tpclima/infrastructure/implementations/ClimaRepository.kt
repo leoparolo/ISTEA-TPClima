@@ -5,7 +5,7 @@ import com.example.istea_tpclima.core.dtos.OpenWeatherForecast5d
 import com.example.istea_tpclima.core.modelos.CiudadModel
 import com.example.istea_tpclima.core.modelos.ClimaDia
 import com.example.istea_tpclima.core.modelos.ClimaModel
-import com.example.istea_tpclima.core.services.IClimaService
+import com.example.istea_tpclima.core.repositories.IClimaRepository
 import com.example.istea_tpclima.infrastructure.shared.ApiRouter
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-class ClimaService : IClimaService
+class ClimaRepository : IClimaRepository
 {
     private val client = HttpClientProvider.client
     private val APIKey = "d867b80e9ff8e2822fde457ee118deba"
