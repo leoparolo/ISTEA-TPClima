@@ -8,6 +8,7 @@ import com.example.istea_tpclima.front.router.enrutador
 import com.example.istea_tpclima.infrastructure.implementations.CiudadRepository
 import com.example.istea_tpclima.infrastructure.implementations.LocationRepository
 import com.example.istea_tpclima.infrastructure.implementations.PaisRepository
+import com.example.istea_tpclima.infrastructure.storage.Prefs
 
 @Composable
 fun CiudadPage(
@@ -19,7 +20,8 @@ fun CiudadPage(
         factory = CiudadesViewModelFactory(
             repositorio = CiudadRepository(paisservice = PaisRepository()),
             router = enrutador(navHostController),
-            locationRepository = LocationRepository(ctx)
+            locationRepository = LocationRepository(ctx),
+                prefs = Prefs(ctx)
         )
     )
     CiudadesView(

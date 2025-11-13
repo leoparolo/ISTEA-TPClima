@@ -54,4 +54,19 @@ class CiudadRepository(
             throw  Exception()
         }
     }
+
+    override suspend fun getPorLatLon(lat: Double, lon: Double): List<CiudadModel> {
+        val respuesta = client.get(ApiRouter.REVERSE_LOCATIONS) {
+            parameter("lat", lat)
+            parameter("lon", lon)
+            parameter("limit", 1)
+            parameter("appid", APIKey)
+        }
+
+        return if (respuesta.status == HttpStatusCode.OK) {
+            respuesta.body<List<CiudadModel>>()
+        } else {
+            emptyList()
+        }
+    }
 }

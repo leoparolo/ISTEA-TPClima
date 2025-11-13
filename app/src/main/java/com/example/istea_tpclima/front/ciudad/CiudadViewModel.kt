@@ -13,13 +13,15 @@ import com.example.istea_tpclima.core.repositories.ICiudadRepository
 import com.example.istea_tpclima.front.router.Ruta
 import com.example.istea_tpclima.front.router.router
 import com.example.istea_tpclima.infrastructure.implementations.LocationRepository
+import com.example.istea_tpclima.infrastructure.storage.Prefs
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class CiudadesViewModel(
     val repositorio: ICiudadRepository,
     val router: router,
-    private val locationRepository : LocationRepository
+    private val locationRepository : LocationRepository,
+    private val prefs : Prefs
 ) : ViewModel(){
     var uiState by mutableStateOf<CiudadEstado>(CiudadEstado.vacio)
     var ciudades : List<CiudadModel> = emptyList()
@@ -37,23 +39,55 @@ class CiudadesViewModel(
 
         viewModelScope.launch {
             try {
-                val ciudadNombre = locationRepository.getCurrentCityName()
+                // 1) Obtener coordenadas reales
+                val coords = locationRepository.getCoordinates()
 
-                if (ciudadNombre == null) {
-                    uiState = CiudadEstado.error("No se pudo obtener tu ubicación actual")
+                if (coords == null) {
+                    uiState = CiudadEstado.error("No se pudieron obtener tus coordenadas")
                     return@launch
                 }
 
-                // Busco en el repositorio usando el nombre de la ciudad detectada
-                ciudades = repositorio.getWFlag(ciudadNombre)
+                // 2) Buscar ciudad exacta por lat/lon en la API
+                val ciudadesPorCoords = repositorio.getPorLatLon(
+                    coords.lat.toDouble(),
+                    coords.lon.toDouble()
+                )
+
+                if (ciudadesPorCoords.isEmpty()) {
+                    uiState = CiudadEstado.error("No encontramos una ciudad válida en tu ubicación")
+                    return@launch
+                }
+
+                // 3) Tomamos la primera ciudad devuelta por la API
+                val ciudadBase = ciudadesPorCoords.first()
+
+                // 4) Enriquecemos con nombre de país y bandera
+                ciudades = repositorio.getWFlag(ciudadBase.name)
 
                 if (ciudades.isEmpty()) {
-                    uiState = CiudadEstado.error("No encontramos resultados para $ciudadNombre")
+                    uiState = CiudadEstado.error("No encontramos detalles de esta ciudad")
                 } else {
-                    // Tomo la primera ciudad encontrada y navego directo al clima
-                    val ciudad = ciudades.first()
-                    seleccionar(ciudad)
+                    // 5) Usamos el MISMO flujo de selección:
+                    //    guarda en Prefs + navega a Clima
+                    seleccionar(ciudades.first())
                 }
+//                val ciudadNombre = locationRepository.getCurrentCityName()
+//
+//                if (ciudadNombre == null) {
+//                    uiState = CiudadEstado.error("No se pudo obtener tu ubicación actual")
+//                    return@launch
+//                }
+//
+//                // Busco en el repositorio usando el nombre de la ciudad detectada
+//                ciudades = repositorio.getWFlag(ciudadNombre)
+//
+//                if (ciudades.isEmpty()) {
+//                    uiState = CiudadEstado.error("No encontramos resultados para $ciudadNombre")
+//                } else {
+//                    // Tomo la primera ciudad encontrada y navego directo al clima
+//                    val ciudad = ciudades.first()
+//                    seleccionar(ciudad)
+//                }
 
             } catch (e: SecurityException) {
                 uiState = CiudadEstado.error("La app no tiene permiso de ubicación")
@@ -102,12 +136,29 @@ class CiudadesViewModel(
     }
 
     private fun seleccionar(ciudad: CiudadModel){
-        val ruta = Ruta.Clima(
-            lat = ciudad.lat,
-            lon = ciudad.lon,
-            nombre = ciudad.name
-        )
-        router.navegar(ruta)
+        viewModelScope.launch {
+            try {
+                // 1) Guardamos la ciudad elegida en DataStore
+                prefs.guardar(ciudad)
+
+                // 2) Navegamos a Clima (por si en el futuro se usan params)
+                val ruta = Ruta.Clima(
+                    lat = ciudad.lat,
+                    lon = ciudad.lon,
+                    nombre = ciudad.name
+                )
+                router.navegar(ruta)
+
+            } catch (e: Exception) {
+                uiState = CiudadEstado.error("No se pudo guardar la ciudad seleccionada")
+            }
+        }
+//        val ruta = Ruta.Clima(
+//            lat = ciudad.lat,
+//            lon = ciudad.lon,
+//            nombre = ciudad.name
+//        )
+//        router.navegar(ruta)
     }
 }
 
@@ -115,12 +166,13 @@ class CiudadesViewModel(
 class CiudadesViewModelFactory(
     private val repositorio: ICiudadRepository,
     private val router: router,
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
+    private val prefs: Prefs
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CiudadesViewModel::class.java)) {
-            return CiudadesViewModel(repositorio,router, locationRepository) as T
+            return CiudadesViewModel(repositorio,router, locationRepository,prefs) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
