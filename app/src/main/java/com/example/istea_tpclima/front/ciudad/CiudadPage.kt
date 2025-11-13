@@ -8,11 +8,11 @@ import com.example.istea_tpclima.front.router.enrutador
 import com.example.istea_tpclima.infrastructure.implementations.CiudadService
 import com.example.istea_tpclima.infrastructure.implementations.PaisService
 import com.example.istea_tpclima.infrastructure.location.LocationService
+import com.example.istea_tpclima.infrastructure.storage.Prefs
 
 @Composable
 fun CiudadPage(
-    navHostController: NavHostController,
-    onCiudadSeleccionada: () -> Unit = {}
+    navHostController: NavHostController
 ) {
     val ctx = LocalContext.current
 
@@ -20,13 +20,13 @@ fun CiudadPage(
         factory = CiudadesViewModelFactory(
             repositorio = CiudadService(paisservice = PaisService()),
             router = enrutador(navHostController),
-            locationService = LocationService(ctx)
+            locationService = LocationService(ctx),
+            prefs = Prefs(ctx)
         )
     )
 
     CiudadesView(
         state = viewModel.uiState,
-        onAction = { intencion -> viewModel.ejecutar(intencion) },
-        onCiudadSeleccionada = onCiudadSeleccionada
+        onAction = { intencion -> viewModel.ejecutar(intencion) }
     )
 }

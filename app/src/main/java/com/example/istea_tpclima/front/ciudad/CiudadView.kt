@@ -27,15 +27,12 @@ import com.example.istea_tpclima.R
 import com.example.istea_tpclima.core.features.ciudades.CiudadEstado
 import com.example.istea_tpclima.core.features.ciudades.CiudadIntencion
 import com.example.istea_tpclima.core.modelos.CiudadModel
-import com.example.istea_tpclima.infrastructure.storage.Prefs
-import kotlinx.coroutines.launch
 
 @Composable
 fun CiudadesView(
     modifier: Modifier = Modifier,
     state: CiudadEstado,
-    onAction: (CiudadIntencion) -> Unit,
-    onCiudadSeleccionada: () -> Unit = {}
+    onAction: (CiudadIntencion) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         backgroundImage(modifier)
@@ -50,7 +47,7 @@ fun CiudadesView(
                     .padding(horizontal = 8.dp)
                     .fillMaxSize()
             ) {
-                // geolocalizar
+                // 🔹 Botón de geolocalizar → dispara intención al ViewModel
                 buttonGeolocalizar(modifier) {
                     onAction(CiudadIntencion.geolocalizar)
                 }
@@ -60,9 +57,8 @@ fun CiudadesView(
                     is CiudadEstado.error -> CiudadErrorView(modifier, state.mensaje)
                     CiudadEstado.vacio -> CiudadVacioView(modifier)
                     is CiudadEstado.resultado -> CiudadResultadoView(
-                        modifier = modifier,
                         ciudades = state.ciudades,
-                        onCiudadSeleccionada = onCiudadSeleccionada
+                        onAction = onAction
                     )
                 }
             }
@@ -180,12 +176,8 @@ fun CiudadVacioView(modifier: Modifier) {
 fun CiudadResultadoView(
     modifier: Modifier = Modifier,
     ciudades: List<CiudadModel>,
-    onCiudadSeleccionada: () -> Unit = {}
+    onAction: (CiudadIntencion) -> Unit
 ) {
-    val ctx = LocalContext.current
-    val prefs = remember { Prefs(ctx) }
-    val scope = rememberCoroutineScope()
-
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -194,17 +186,18 @@ fun CiudadResultadoView(
     ) {
         items(ciudades) { ciudad ->
             CiudadItem(ciudad) { seleccionada ->
-                scope.launch {
-                    prefs.guardar(seleccionada)
-                    onCiudadSeleccionada()
-                }
+                // 👉 La UI SOLO envía la intención
+                onAction(CiudadIntencion.seleccionar(seleccionada))
             }
         }
     }
 }
 
 @Composable
-fun CiudadItem(ciudad: CiudadModel, onCiudadSeleccionada: (CiudadModel) -> Unit) {
+fun CiudadItem(
+    ciudad: CiudadModel,
+    onCiudadSeleccionada: (CiudadModel) -> Unit
+) {
     Card(
         onClick = { onCiudadSeleccionada(ciudad) },
         modifier = Modifier

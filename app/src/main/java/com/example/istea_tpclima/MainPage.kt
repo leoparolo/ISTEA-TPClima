@@ -22,7 +22,7 @@ fun MainPage() {
         }
 
         composable(Screen.Ciudades.route) {
-            CiudadPage(onCiudadSeleccionada = { navHostController.popBackStack() },
+            CiudadPage(
                 navHostController = navHostController)
         }
     }
