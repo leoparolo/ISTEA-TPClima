@@ -87,8 +87,3 @@ fun backgroundImage(modifier: Modifier,imageRes: Int)
             .background(Color.Black.copy(alpha = 0.5f))
     )
 }
-
-
-//onCambiarCiudad = {
-//    navHostController.navigate(Screen.Ciudades.route)
-//}

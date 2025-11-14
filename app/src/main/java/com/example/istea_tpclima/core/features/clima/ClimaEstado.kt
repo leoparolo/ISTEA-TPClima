@@ -7,4 +7,5 @@ sealed class ClimaEstado {
     data object SinCiudadGuardada : ClimaEstado()
     data class Mostrando(val data: ClimaModel) : ClimaEstado()
     data class Error(val mensaje: String) : ClimaEstado()
+    data class Compartir(val texto: String) : ClimaEstado()
 }

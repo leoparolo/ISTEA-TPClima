@@ -32,7 +32,7 @@ class ClimaViewModel(
             is ClimaIntencion.CargarPorCiudad           -> cargar(intencion.ciudad)
             is ClimaIntencion.Refrescar                 -> refrescar()
             is ClimaIntencion.CambiarCiudadClick        -> uiState = ClimaEstado.SinCiudadGuardada
-            is ClimaIntencion.CompartirClick            -> Unit
+            is ClimaIntencion.CompartirClick            -> compartir()
             is ClimaIntencion.LimpiarError              -> uiState = ClimaEstado.Cargando
         }
     }
@@ -64,6 +64,22 @@ class ClimaViewModel(
     private fun refrescar() {
         val c = (uiState as? ClimaEstado.Mostrando)?.data?.ciudad ?: return
         cargar(c)
+    }
+    private fun compartir(){
+        viewModelScope.launch {
+            val ciudad = prefs.leer().firstOrNull()
+
+            if (ciudad != null) {
+                val texto = """
+                📍 Ciudad: ${ciudad.name}  
+                🇨🇴 País: ${ciudad.countryFullName}  
+                🌡️ Lat: ${ciudad.lat}, Lon: ${ciudad.lon}
+            """.trimIndent()
+
+                uiState = ClimaEstado.Compartir(texto)
+            }
+        }
+
     }
 }
 

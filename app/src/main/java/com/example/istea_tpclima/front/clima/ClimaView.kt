@@ -1,5 +1,6 @@
 package com.example.istea_tpclima.front.clima
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +23,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -49,6 +52,7 @@ fun ClimaView(
     state : ClimaEstado,
     onAction: (ClimaIntencion)->Unit
 ){
+    val ctx = LocalContext.current
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -70,7 +74,17 @@ fun ClimaView(
                     is ClimaEstado.SinCiudadGuardada -> {
                         LaunchedEffect(Unit) {
                         onAction(ClimaIntencion.CambiarCiudadClick)
+                        }
                     }
+                    is ClimaEstado.Compartir -> {
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, state.texto)
+                        }
+
+                        ctx.startActivity(
+                            Intent.createChooser(intent, "Compartir clima")
+                        )
                     }
                 }
             }
@@ -139,7 +153,7 @@ fun ClimaResultadoView(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "PONER TEXTO DE CIUDAD",
+                        text = "${state.ciudad.name}, ${state.ciudad.country}",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color.White
@@ -151,14 +165,14 @@ fun ClimaResultadoView(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = null,
-                        tint = Color.Gray,
-                        modifier = Modifier
-                            .size(32.dp)
-                            .padding(end = 8.dp)
-                    )
+                    IconButton(onClick = { onAction(ClimaIntencion.CompartirClick) }) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "Compartir",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                     Text(
                         text = state.actual.descripcion,
                         fontWeight = FontWeight.SemiBold,
@@ -197,16 +211,23 @@ fun ClimaChartCard(values: List<ClimaDia>) {
             BarChartData.Bar(
                 label = value.dia,
                 value = value.minC.toFloat(),
-                color = Color.Blue
+                color = Color.Gray
             )
         )
     }
-    BarChart(
-        barChartData = BarChartData(bars = barras),
+    Box(
         modifier = Modifier
-            .fillMaxWidth(),
-        labelDrawer = SimpleValueDrawer(
-            drawLocation = SimpleValueDrawer.DrawLocation.XAxis
+            .fillMaxWidth()
+            .background(Color.White, shape = RoundedCornerShape(16.dp))
+            .padding(16.dp)
+    ) {
+        BarChart(
+            barChartData = BarChartData(bars = barras),
+            modifier = Modifier
+                .fillMaxWidth(),
+            labelDrawer = SimpleValueDrawer(
+                drawLocation = SimpleValueDrawer.DrawLocation.XAxis
+            )
         )
-    )
+    }
 }
