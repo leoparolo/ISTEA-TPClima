@@ -108,47 +108,4 @@ class LocationRepository(private val context: Context) {
                 }
         }
     }
-//    private val fused: FusedLocationProviderClient =
-//        LocationServices.getFusedLocationProviderClient(context)
-//    private val client = LocationServices.getFusedLocationProviderClient(context)
-//
-//    // Devuelve el nombre de la ciudad según la ubicación actual
-//    @SuppressLint("MissingPermission")
-//    suspend fun getCurrentCityName(): String? {
-//
-//        val fine = ActivityCompat.checkSelfPermission(
-//            context, Manifest.permission.ACCESS_FINE_LOCATION
-//        )
-//        val coarse = ActivityCompat.checkSelfPermission(
-//            context, Manifest.permission.ACCESS_COARSE_LOCATION
-//        )
-//
-//        if (fine != PackageManager.PERMISSION_GRANTED &&
-//            coarse != PackageManager.PERMISSION_GRANTED
-//        ) {
-//            return null
-//        }
-//
-//        return suspendCancellableCoroutine { cont ->
-//            fused.lastLocation
-//                .addOnSuccessListener { loc ->
-//                    if (loc == null) {
-//                        cont.resume(null)
-//                        return@addOnSuccessListener
-//                    }
-//
-//                    try {
-//                        val geo = Geocoder(context, Locale.getDefault())
-//                        val res = geo.getFromLocation(loc.latitude, loc.longitude, 1)
-//                        val city = res?.firstOrNull()?.locality
-//                        cont.resume(city)
-//                    } catch (e: Exception) {
-//                        cont.resume(null)
-//                    }
-//                }
-//                .addOnFailureListener {
-//                    cont.resume(null)
-//                }
-//        }
-//    }
 }

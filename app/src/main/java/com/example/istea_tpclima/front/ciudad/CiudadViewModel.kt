@@ -28,8 +28,8 @@ class CiudadesViewModel(
     private var searchJob : Job? = null
     fun ejecutar(intencion: CiudadIntencion){
         when(intencion){
-            is CiudadIntencion.buscar -> buscar(nombre = intencion.nombre)
-            is CiudadIntencion.seleccionar -> seleccionar(ciudad = intencion.ciudad)
+            is CiudadIntencion.buscar       -> buscar(nombre = intencion.nombre)
+            is CiudadIntencion.seleccionar  -> seleccionar(ciudad = intencion.ciudad)
             is CiudadIntencion.geolocalizar -> geolocalizar()
         }
     }
@@ -71,23 +71,6 @@ class CiudadesViewModel(
                     //    guarda en Prefs + navega a Clima
                     seleccionar(ciudades.first())
                 }
-//                val ciudadNombre = locationRepository.getCurrentCityName()
-//
-//                if (ciudadNombre == null) {
-//                    uiState = CiudadEstado.error("No se pudo obtener tu ubicación actual")
-//                    return@launch
-//                }
-//
-//                // Busco en el repositorio usando el nombre de la ciudad detectada
-//                ciudades = repositorio.getWFlag(ciudadNombre)
-//
-//                if (ciudades.isEmpty()) {
-//                    uiState = CiudadEstado.error("No encontramos resultados para $ciudadNombre")
-//                } else {
-//                    // Tomo la primera ciudad encontrada y navego directo al clima
-//                    val ciudad = ciudades.first()
-//                    seleccionar(ciudad)
-//                }
 
             } catch (e: SecurityException) {
                 uiState = CiudadEstado.error("La app no tiene permiso de ubicación")
@@ -120,19 +103,6 @@ class CiudadesViewModel(
                 uiState = CiudadEstado.error(e.message ?: "error desconocido")
             }
         }
-//        uiState = CiudadEstado.cargando
-//        viewModelScope.launch {
-//            try {
-//                ciudades = repositorio.getWFlag(nombre)
-//                if (ciudades.isEmpty()) {
-//                    uiState = CiudadEstado.vacio
-//                } else {
-//                    uiState = CiudadEstado.resultado(ciudades)
-//                }
-//            } catch (exeption: Exception){
-//                uiState = CiudadEstado.error(exeption.message ?: "error desconocido")
-//            }
-//        }
     }
 
     private fun seleccionar(ciudad: CiudadModel){
@@ -153,12 +123,6 @@ class CiudadesViewModel(
                 uiState = CiudadEstado.error("No se pudo guardar la ciudad seleccionada")
             }
         }
-//        val ruta = Ruta.Clima(
-//            lat = ciudad.lat,
-//            lon = ciudad.lon,
-//            nombre = ciudad.name
-//        )
-//        router.navegar(ruta)
     }
 }
 

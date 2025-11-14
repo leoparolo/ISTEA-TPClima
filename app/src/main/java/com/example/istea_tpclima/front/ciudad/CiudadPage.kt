@@ -12,8 +12,7 @@ import com.example.istea_tpclima.infrastructure.storage.Prefs
 
 @Composable
 fun CiudadPage(
-    navHostController:  NavHostController,
-    onCiudadSeleccionada: () -> Unit = {}
+    navHostController:  NavHostController
 ) {
     val ctx = LocalContext.current
     val viewModel : CiudadesViewModel = viewModel(
@@ -29,6 +28,5 @@ fun CiudadPage(
         onAction = { intencion ->
             viewModel.ejecutar(intencion)
         },
-        onCiudadSeleccionada = onCiudadSeleccionada
     )
 }

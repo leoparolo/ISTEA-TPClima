@@ -61,31 +61,16 @@ fun MainPage(modifier : Modifier) {
             modifier = androidx.compose.ui.Modifier.padding(padding)
         ) {
             composable(Screen.Clima.route) {
-                ClimaPage(onCambiarCiudad = {
-                    navHostController.navigate(Screen.Ciudades.route)
-                })
+                ClimaPage()
             }
 
             composable(Screen.Ciudades.route) {
                 CiudadPage(
-                    onCiudadSeleccionada = { navHostController.popBackStack() },
                     navHostController = navHostController
                 )
             }
         }
     }
-//    NavHost(navController = navHostController,
-//        startDestination = Screen.Clima.route)
-//    {
-//        composable(Screen.Clima.route) {
-//            ClimaPage(onCambiarCiudad = { navHostController.navigate(Screen.Ciudades.route) })
-//        }
-//
-//        composable(Screen.Ciudades.route) {
-//            CiudadPage(onCiudadSeleccionada = { navHostController.popBackStack() },
-//                navHostController = navHostController)
-//        }
-//    }
 }
 @Composable
 fun backgroundImage(modifier: Modifier,imageRes: Int)
@@ -102,3 +87,8 @@ fun backgroundImage(modifier: Modifier,imageRes: Int)
             .background(Color.Black.copy(alpha = 0.5f))
     )
 }
+
+
+//onCambiarCiudad = {
+//    navHostController.navigate(Screen.Ciudades.route)
+//}

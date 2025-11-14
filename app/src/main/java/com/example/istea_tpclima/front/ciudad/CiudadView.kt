@@ -58,13 +58,13 @@ import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
+import kotlinx.coroutines.launch
 
 @Composable
 fun CiudadesView (
     modifier: Modifier = Modifier,
     state : CiudadEstado,
-    onAction: (CiudadIntencion)->Unit,
-    onCiudadSeleccionada: () -> Unit = {}
+    onAction: (CiudadIntencion)->Unit
 ) {
     Box(
         modifier = Modifier.fillMaxSize()
@@ -84,10 +84,11 @@ fun CiudadesView (
                     onAction(CiudadIntencion.geolocalizar)
                 }
                 when (state) {
-                    CiudadEstado.cargando -> { CiudadCargandoView(modifier) }
+                    is CiudadEstado.cargando -> { CiudadCargandoView(modifier) }
                     is CiudadEstado.error -> { CiudadErrorView(modifier,state.mensaje) }
-                    CiudadEstado.vacio -> { CiudadVacioView(modifier) }
-                    is CiudadEstado.resultado -> { CiudadResultadoView(modifier,state.ciudades) }
+                    is CiudadEstado.vacio -> { CiudadVacioView(modifier) }
+                    is CiudadEstado.resultado -> { CiudadResultadoView(modifier,state.ciudades,
+                        onAction) }
                 }
             }
         }
@@ -242,7 +243,8 @@ fun CiudadVacioView(modifier: Modifier)
 @Composable
 fun CiudadResultadoView(
     modifier: Modifier = Modifier,
-    ciudades: List<CiudadModel>
+    ciudades: List<CiudadModel>,
+    onAction: (CiudadIntencion) -> Unit
 ) {
     val ctx = LocalContext.current
     val prefs = remember { Prefs(ctx) }
@@ -255,19 +257,7 @@ fun CiudadResultadoView(
     ) {
         items(ciudades) { ciudad ->
             CiudadItem(ciudad) { seleccionada ->
-                val model = CiudadModel(
-                    name = seleccionada.name,
-                    country = seleccionada.country,
-                    countryFullName = seleccionada.countryFullName,
-                    flag = seleccionada.flag,
-                    state = seleccionada.state,
-                    lon = seleccionada.lon,
-                    lat = seleccionada.lat
-                )
-//                scope.launch {
-//                    withContext(Dispatchers.IO) { prefs.guardar(model) }
-//                    onCiudadSeleccionada()
-//                }
+                onAction(CiudadIntencion.seleccionar(seleccionada))
             }
         }
     }
