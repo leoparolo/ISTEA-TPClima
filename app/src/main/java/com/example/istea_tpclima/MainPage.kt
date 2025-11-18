@@ -61,7 +61,7 @@ fun MainPage(modifier : Modifier) {
             modifier = androidx.compose.ui.Modifier.padding(padding)
         ) {
             composable(Screen.Clima.route) {
-                ClimaPage()
+                ClimaPage(navController = navHostController)
             }
 
             composable(Screen.Ciudades.route) {
